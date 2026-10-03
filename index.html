@@ -3,175 +3,1378 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rotating Half Earth</title>
+  <title>Terran Explorer - Half Earth</title>
   <style>
-    * { box-sizing: border-box; }
+    :root {
+      --sky-blue: #7ad2ff;
+      --sky-deep: #3a8fd8;
+      --panel: #dff4ff;
+      --pixel-dark: #1a2d3d;
+      --pixel-shadow: #0d1a2a;
+      --button: #ffd770;
+      --button-dark: #e9a728;
+      --button-green: #7fe094;
+      --button-green-dark: #56b774;
+      --button-red: #ff8d71;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
 
     html, body {
       margin: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(to bottom, #7ad2ff, #d9f6ff 100%);
+      background: linear-gradient(to bottom, #7ad2ff, #d9f6ff);
       font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--pixel-dark);
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .container {
-      perspective: 1200px;
-      width: 600px;
-      height: 600px;
+    body {
+      padding: 0;
     }
 
-    #earth {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #5cc4ff 0%, #2c8de8 30%, #0a5fb8 60%, #1d417e 100%);
-      border: 8px solid #0d1a2a;
-      box-shadow: inset -20px -20px 0 rgba(0,0,0,0.15), 0 20px 40px rgba(0,0,0,0.3);
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: 4px solid var(--pixel-shadow);
+      box-shadow: 0 0 0 3px #fff inset, 0 6px 0 rgba(0, 0, 0, 0.2);
+      transition: transform 0.12s ease;
+      image-rendering: pixelated;
+      font-weight: 800;
+      letter-spacing: 1px;
+      border-radius: 12px;
+    }
+
+    button:active {
+      transform: translateY(3px);
+      box-shadow: 0 0 0 3px #fff inset, 0 3px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    #app {
+      position: relative;
+      width: min(1200px, 96vw);
+      height: min(800px, 96vh);
+      background: linear-gradient(180deg, #8fd9ff 0%, #d5f6ff 100%);
+      border: 8px solid var(--pixel-shadow);
+      border-radius: 20px;
+      box-shadow: 0 16px 0 rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    .header {
+      background: rgba(255, 255, 255, 0.3);
+      border-bottom: 6px solid var(--pixel-shadow);
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #1f3d77;
+      text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.5);
+      letter-spacing: 2px;
+    }
+
+    .menu-btn {
+      background: var(--button);
+      color: var(--pixel-dark);
+      padding: 10px 20px;
+      font-size: 0.9rem;
+      min-width: 140px;
+    }
+
+    /* MAIN CONTENT */
+    .content {
+      flex: 1;
+      display: flex;
       position: relative;
       overflow: hidden;
-      cursor: grab;
-      transform-style: preserve-3d;
     }
 
-    #earth.dragging {
-      cursor: grabbing;
+    /* SCREEN */
+    .screen {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
     }
 
-    /* Earth surface with continents */
-    #earth::before {
+    .screen.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    /* MENU SCREEN */
+    #menu-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .menu-panel {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.4);
+      border: 6px solid var(--pixel-shadow);
+      border-radius: 20px;
+      padding: 30px;
+      width: min(600px, 85%);
+    }
+
+    .menu-panel h2 {
+      margin: 0 0 16px 0;
+      font-size: 2.4rem;
+      color: #1f3d77;
+    }
+
+    .menu-panel p {
+      margin: 0 0 20px 0;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .menu-planet {
+      width: 180px;
+      height: 180px;
+      margin: 20px auto 30px auto;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #5cc4ff 0%, #2c8de8 30%, #0a5fb8 60%, #1d417e 100%);
+      border: 6px solid var(--pixel-shadow);
+      box-shadow: inset -14px -14px 0 rgba(0, 0, 0, 0.12), 0 12px 0 rgba(0, 0, 0, 0.2);
+      position: relative;
+      animation: floatPlanet 4s ease-in-out infinite;
+    }
+
+    .menu-planet::before {
       content: "";
       position: absolute;
       inset: 0;
       border-radius: 50%;
       background:
-        /* Green landmasses */
-        radial-gradient(circle at 35% 30%, rgba(119, 215, 132, 0.85) 0 9%, transparent 9% 14%),
-        radial-gradient(circle at 62% 46%, rgba(122, 215, 132, 0.86) 0 12%, transparent 12% 17%),
+        radial-gradient(circle at 30% 32%, rgba(255, 255, 255, 0.7), transparent 18%),
+        radial-gradient(circle at 72% 60%, rgba(74, 234, 163, 0.8), transparent 18%),
+        radial-gradient(circle at 55% 38%, rgba(72, 160, 90, 0.8), transparent 18%);
+      transform: rotate(-8deg);
+    }
+
+    .menu-planet::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 32%, transparent 40%);
+      mix-blend-mode: screen;
+    }
+
+    .start-btn {
+      background: var(--button-green);
+      color: var(--pixel-dark);
+      padding: 16px 40px;
+      font-size: 1.2rem;
+      min-width: 240px;
+    }
+
+    /* EARTH SCREEN */
+    #earth-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .earth-container {
+      perspective: 1200px;
+      width: min(70vmin, 520px);
+      height: min(70vmin, 520px);
+      position: relative;
+    }
+
+    #earth-globe {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 8px solid var(--pixel-shadow);
+      background: linear-gradient(135deg, #5cc4ff 0%, #2c8de8 30%, #0a5fb8 60%, #1d417e 100%);
+      box-shadow: inset -18px -18px 0 rgba(0, 0, 0, 0.12), 0 14px 0 rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      cursor: grab;
+      transform-style: preserve-3d;
+      user-select: none;
+    }
+
+    #earth-globe.dragging {
+      cursor: grabbing;
+    }
+
+    #earth-globe::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(119, 215, 132, 0.9) 0 9%, transparent 9% 14%),
+        radial-gradient(circle at 62% 46%, rgba(122, 215, 132, 0.9) 0 12%, transparent 12% 17%),
         radial-gradient(circle at 22% 62%, rgba(122, 219, 137, 0.9) 0 9%, transparent 9% 15%),
         radial-gradient(circle at 68% 72%, rgba(112, 205, 128, 0.9) 0 12%, transparent 12% 19%),
         radial-gradient(circle at 49% 62%, rgba(95, 188, 116, 0.8) 0 10%, transparent 10% 18%);
       z-index: 2;
     }
 
-    /* Shine effect */
-    #earth::after {
+    #earth-globe::after {
       content: "";
       position: absolute;
       inset: 0;
       border-radius: 50%;
-      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.3), transparent 22%);
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), transparent 40%, rgba(0, 0, 0, 0.15));
       pointer-events: none;
       z-index: 3;
     }
 
-    /* Shadow effect */
-    #earth .shadow {
+    .globe-shadow {
       position: absolute;
       inset: 0;
       border-radius: 50%;
-      background: linear-gradient(90deg, rgba(255,255,255,0.2), transparent 40%, rgba(0,0,0,0.2));
+      background: radial-gradient(circle at 55% 40%, transparent 56%, rgba(18, 46, 90, 0.25));
       pointer-events: none;
       z-index: 4;
     }
 
-    .info {
+    .area-marker {
       position: absolute;
-      bottom: 20px;
+      width: 100px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 4px solid var(--pixel-shadow);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      color: #1a2d3d;
+      font-weight: 900;
+      font-size: 0.85rem;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease;
+      z-index: 5;
+      user-select: none;
+    }
+
+    .area-marker:hover {
+      transform: translateY(-2px) scale(1.05);
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    .area-marker[data-area="sea"] {
+      left: 52%;
+      top: 62%;
+    }
+
+    .area-marker[data-area="volcano"] {
+      left: 18%;
+      top: 36%;
+    }
+
+    .area-marker[data-area="mountain"] {
+      left: 62%;
+      top: 20%;
+    }
+
+    .area-marker[data-area="forest"] {
+      left: 68%;
+      top: 72%;
+    }
+
+    .area-marker .dot {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ffdc67;
+      border: 2px solid var(--pixel-shadow);
+      left: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* CAT */
+    .cat {
+      position: absolute;
+      left: 50%;
+      top: 58%;
+      width: 20px;
+      height: 20px;
+      z-index: 8;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.2));
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .cat-pixel {
+      width: 20px;
+      height: 20px;
+      position: relative;
+      image-rendering: pixelated;
+    }
+
+    .cat-pixel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(#f7c68d 0 0) 8px 2px / 3px 3px no-repeat,
+        linear-gradient(#f7c68d 0 0) 14px 2px / 3px 3px no-repeat,
+        linear-gradient(#f7c68d 0 0) 4px 6px / 3px 3px no-repeat,
+        linear-gradient(#f7c68d 0 0) 8px 6px / 3px 3px no-repeat,
+        linear-gradient(#f7c68d 0 0) 12px 6px / 3px 3px no-repeat,
+        linear-gradient(#f7c68d 0 0) 16px 6px / 3px 3px no-repeat,
+        linear-gradient(#f7c68d 0 0) 6px 10px / 3px 3px no-repeat,
+        linear-gradient(#f7c68d 0 0) 12px 10px / 3px 3px no-repeat,
+        linear-gradient(#f7c68d 0 0) 18px 10px / 3px 3px no-repeat,
+        linear-gradient(#d77b3d 0 0) 8px 1px / 3px 2px no-repeat,
+        linear-gradient(#d77b3d 0 0) 14px 1px / 3px 2px no-repeat,
+        linear-gradient(#0d1a2a 0 0) 9px 6px / 2px 2px no-repeat,
+        linear-gradient(#0d1a2a 0 0) 13px 6px / 2px 2px no-repeat;
+    }
+
+    .controls-info {
+      position: absolute;
+      bottom: 14px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(255, 255, 255, 0.9);
-      border: 4px solid #0d1a2a;
-      border-radius: 12px;
-      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.75);
+      border: 4px solid var(--pixel-shadow);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-weight: 800;
+      color: #1a2d3d;
+      font-size: 0.85rem;
       text-align: center;
-      font-weight: bold;
-      color: #1d3d77;
-      font-size: 14px;
-      white-space: nowrap;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
     }
 
-    @media (max-width: 768px) {
-      .container {
-        width: 400px;
-        height: 400px;
+    /* INTERIOR SCREEN */
+    #interior-screen {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .scene-header {
+      background: rgba(255, 255, 255, 0.3);
+      border-bottom: 6px solid var(--pixel-shadow);
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .scene-header h2 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: #123d6d;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .back-btn {
+      background: var(--button);
+      color: var(--pixel-dark);
+      padding: 10px 20px;
+      font-size: 0.9rem;
+      min-width: 120px;
+    }
+
+    .scene {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+      background: linear-gradient(to bottom, #9ed7ff, #dff5ff);
+    }
+
+    .scene-sea {
+      background: linear-gradient(to bottom, #6fd1ff 0%, #2d8edb 25%, #174d8d 100%);
+    }
+
+    .scene-volcano {
+      background: linear-gradient(to bottom, #4a3d3d, #8b3d2e 40%, #3a2020 100%);
+    }
+
+    .scene-mountain {
+      background: linear-gradient(to bottom, #bfe4ff 0%, #f8fcff 60%, #e0f0ff 100%);
+    }
+
+    .scene-forest {
+      background: linear-gradient(to bottom, #7ad6a5 0%, #61af87 35%, #3a7b57 100%);
+    }
+
+    .feature {
+      position: absolute;
+      cursor: pointer;
+      transition: transform 0.12s ease;
+      user-select: none;
+    }
+
+    .feature:hover {
+      transform: translateY(-3px) scale(1.05);
+    }
+
+    /* SEA ELEMENTS */
+    .sea-wave {
+      position: absolute;
+      left: -10%;
+      right: -10%;
+      height: 100px;
+      background: rgba(110, 193, 255, 0.35);
+      border-top: 5px solid rgba(255, 255, 255, 0.4);
+      border-radius: 50% 50% 0 0;
+      animation: waveShift 5s ease-in-out infinite alternate;
+    }
+
+    .sea-wave.w1 {
+      bottom: 180px;
+    }
+
+    .sea-wave.w2 {
+      bottom: 110px;
+      animation-delay: 1s;
+    }
+
+    .sea-wave.w3 {
+      bottom: 50px;
+      animation-delay: 2s;
+    }
+
+    .fish {
+      width: 40px;
+      height: 18px;
+      background: linear-gradient(90deg, #f5d66f, #f7af51);
+      border: 3px solid var(--pixel-shadow);
+      border-radius: 10px 12px 12px 10px;
+      position: relative;
+    }
+
+    .fish::after {
+      content: "";
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 10px solid #ffd770;
+      transform: translateY(-50%);
+    }
+
+    .shell {
+      width: 26px;
+      height: 20px;
+      background: linear-gradient(180deg, #f6d8ba, #d6a274);
+      border: 3px solid var(--pixel-shadow);
+      border-radius: 50% 50% 45% 45%;
+      position: relative;
+    }
+
+    .coral {
+      width: 36px;
+      height: 60px;
+      background: linear-gradient(180deg, #ff8a66, #d94845);
+      border: 3px solid var(--pixel-shadow);
+      border-radius: 35% 35% 15% 15%;
+      position: relative;
+    }
+
+    .sea-plant {
+      width: 16px;
+      height: 70px;
+      background: linear-gradient(180deg, #7fe59a, #49bf7d);
+      border: 3px solid var(--pixel-shadow);
+      border-radius: 16px;
+      position: relative;
+    }
+
+    .rock {
+      width: 48px;
+      height: 32px;
+      background: linear-gradient(180deg, #8a8d98, #5b6174);
+      border: 3px solid var(--pixel-shadow);
+      border-radius: 16px;
+      position: relative;
+    }
+
+    .bubble {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      animation: bubbleRise 4s ease-in-out infinite;
+    }
+
+    /* VOLCANO ELEMENTS */
+    .volcano-base {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.25));
+    }
+
+    .volcano-mountain {
+      position: absolute;
+      left: 50%;
+      bottom: 12%;
+      width: 360px;
+      height: 260px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, #523632 0%, #2a1b1e 100%);
+      border: 5px solid var(--pixel-shadow);
+      clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+      z-index: 1;
+    }
+
+    .crater {
+      position: absolute;
+      left: 50%;
+      bottom: 10%;
+      width: 180px;
+      height: 120px;
+      background: radial-gradient(circle at 50% 40%, #ff9a2f 0%, #ea4a22 25%, #3b1415 60%, #130e10 100%);
+      border: 5px solid var(--pixel-shadow);
+      border-radius: 50% 50% 50% 50% / 56% 56% 44% 44%;
+      transform: translateX(-50%);
+      z-index: 2;
+      box-shadow: inset 0 10px 0 rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+
+    .lava {
+      position: absolute;
+      inset: 15% 6% 10% 6%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 35%, #ffd466 0%, #ff8a3d 18%, #ff5e2d 40%, #a31212 100%);
+      animation: lavaPulse 1.5s ease-in-out infinite alternate;
+    }
+
+    .smoke {
+      width: 40px;
+      height: 60px;
+      background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(2px);
+      animation: smokeRise 4s ease-in-out infinite;
+      position: relative;
+    }
+
+    .magma {
+      width: 74px;
+      height: 46px;
+      background: linear-gradient(180deg, #ffb553, #ff542e);
+      border: 3px solid var(--pixel-shadow);
+      border-radius: 28% 28% 38% 38%;
+      position: relative;
+    }
+
+    .volcanic-rock {
+      width: 58px;
+      height: 38px;
+      background: linear-gradient(180deg, #8b5f57, #4e3433);
+      border: 3px solid var(--pixel-shadow);
+      border-radius: 16px;
+      position: relative;
+    }
+
+    /* MOUNTAIN ELEMENTS */
+    .mountain-peak {
+      position: absolute;
+      width: 340px;
+      height: 200px;
+      left: 50%;
+      bottom: 12%;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, #b0c2d6, #7c90a5);
+      border: 5px solid var(--pixel-shadow);
+      clip-path: polygon(0% 100%, 20% 60%, 35% 40%, 50% 15%, 58% 35%, 75% 60%, 100% 100%);
+      z-index: 1;
+    }
+
+    .snow-cap {
+      position: absolute;
+      left: 50%;
+      bottom: 34%;
+      width: 180px;
+      height: 90px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, #ffffff, #d9ebff);
+      border: 5px solid var(--pixel-shadow);
+      clip-path: polygon(0% 100%, 22% 30%, 38% 10%, 50% 0%, 60% 12%, 74% 30%, 100% 100%);
+      z-index: 2;
+    }
+
+    .cloud {
+      width: 110px;
+      height: 36px;
+      background: linear-gradient(180deg, #f4fcff, #c9ecff);
+      border: 3px solid var(--pixel-shadow);
+      border-radius: 16px;
+      position: absolute;
+      opacity: 0.9;
+      animation: cloudFloat 12s ease-in-out infinite alternate;
+    }
+
+    .cloud::before,
+    .cloud::after {
+      content: "";
+      position: absolute;
+      background: inherit;
+      border-radius: 50%;
+      border: 3px solid var(--pixel-shadow);
+    }
+
+    .cloud::before {
+      width: 34px;
+      height: 34px;
+      left: 16px;
+      top: -20px;
+    }
+
+    .cloud::after {
+      width: 42px;
+      height: 38px;
+      right: 18px;
+      top: -18px;
+    }
+
+    .water-source {
+      width: 94px;
+      height: 46px;
+      background: linear-gradient(180deg, #66d0ff, #3398df);
+      border: 3px solid var(--pixel-shadow);
+      border-radius: 50% 50% 50% 50%;
+      position: relative;
+      box-shadow: inset 0 6px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    .mountain-tree {
+      width: 20px;
+      height: 54px;
+      background: linear-gradient(180deg, #9e734d, #714d2f);
+      border: 3px solid var(--pixel-shadow);
+      position: absolute;
+      border-radius: 6px;
+    }
+
+    .mountain-tree::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -28px;
+      width: 62px;
+      height: 52px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, #67c979, #3d9b5f);
+      clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+      border: 3px solid var(--pixel-shadow);
+    }
+
+    /* FOREST ELEMENTS */
+    .forest-tree {
+      width: 20px;
+      height: 54px;
+      background: linear-gradient(180deg, #9e734d, #714d2f);
+      border: 3px solid var(--pixel-shadow);
+      position: absolute;
+      border-radius: 6px;
+    }
+
+    .forest-tree::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -36px;
+      width: 78px;
+      height: 64px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, #5cc37a, #2f8b5f);
+      clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+      border: 3px solid var(--pixel-shadow);
+    }
+
+    .forest-plant {
+      width: 28px;
+      height: 18px;
+      background: linear-gradient(180deg, #7eea97, #50b96d);
+      border: 3px solid var(--pixel-shadow);
+      border-radius: 8px 8px 12px 12px;
+      position: relative;
+    }
+
+    .flower {
+      width: 16px;
+      height: 16px;
+      background: radial-gradient(circle at center, #fffbbe 0 30%, #ff6db0 30% 60%, #ff5a7a 60% 100%);
+      border: 3px solid var(--pixel-shadow);
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .animal {
+      width: 50px;
+      height: 24px;
+      background: linear-gradient(90deg, #a37557, #7c4d39);
+      border: 3px solid var(--pixel-shadow);
+      border-radius: 18px 14px 14px 12px;
+      position: relative;
+    }
+
+    .animal::before {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      right: 5px;
+      top: 6px;
+      background: #0d1a2a;
+      border-radius: 50%;
+    }
+
+    .mushroom {
+      width: 26px;
+      height: 40px;
+      background: linear-gradient(180deg, #ff9ca3, #d96a76);
+      border: 3px solid var(--pixel-shadow);
+      border-radius: 10px 10px 14px 14px;
+      position: absolute;
+    }
+
+    .mushroom::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -12px;
+      width: 36px;
+      height: 18px;
+      background: linear-gradient(180deg, #f9d0d8, #e9a7a8);
+      border: 3px solid var(--pixel-shadow);
+      border-radius: 50% 50% 18% 18%;
+      transform: translateX(-50%);
+    }
+
+    /* MODAL */
+    .fact-modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 24, 40, 0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .fact-modal.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .fact-card {
+      width: min(500px, 82vw);
+      background: linear-gradient(180deg, #eaf9ff, #d4f0ff);
+      border: 6px solid var(--pixel-shadow);
+      border-radius: 18px;
+      box-shadow: 0 14px 0 rgba(0, 0, 0, 0.2);
+      padding: 24px 20px 18px 20px;
+      position: relative;
+    }
+
+    .fact-card h3 {
+      margin: 0 0 12px 0;
+      color: #173a73;
+      font-size: 1.6rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    .fact-content {
+      background: rgba(255, 255, 255, 0.7);
+      border: 4px solid var(--pixel-shadow);
+      border-radius: 12px;
+      padding: 14px 12px;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #1d395f;
+      text-align: center;
+    }
+
+    .fact-content strong {
+      color: #295aa5;
+    }
+
+    .close-fact-btn {
+      margin-top: 16px;
+      background: var(--button-red);
+      display: block;
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+    }
+
+    /* ANIMATIONS */
+    @keyframes floatPlanet {
+      0%,
+      100% {
+        transform: translateY(0px);
       }
 
-      .info {
-        font-size: 12px;
-        padding: 10px 15px;
+      50% {
+        transform: translateY(-10px);
       }
     }
 
-    @media (max-width: 480px) {
-      .container {
-        width: 320px;
-        height: 320px;
+    @keyframes waveShift {
+      0% {
+        transform: translateX(-2%) scaleY(1);
       }
 
-      #earth {
-        border-width: 6px;
+      100% {
+        transform: translateX(2%) scaleY(1.08);
+      }
+    }
+
+    @keyframes bubbleRise {
+      0% {
+        transform: translateY(18px) scale(0.8);
+        opacity: 0;
       }
 
-      .info {
-        font-size: 11px;
+      15% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-140px) scale(1.2);
+        opacity: 0;
+      }
+    }
+
+    @keyframes lavaPulse {
+      0% {
+        transform: scale(0.96);
+        filter: brightness(0.96);
+      }
+
+      100% {
+        transform: scale(1.04);
+        filter: brightness(1.1);
+      }
+    }
+
+    @keyframes smokeRise {
+      0% {
+        opacity: 0;
+        transform: translate(0, 16px) scale(0.7);
+      }
+
+      20% {
+        opacity: 0.65;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(10px, -80px) scale(1.4);
+      }
+    }
+
+    @keyframes cloudFloat {
+      0% {
+        transform: translateX(-10px);
+      }
+
+      100% {
+        transform: translateX(10px);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .header h1 {
+        font-size: 1.5rem;
+      }
+
+      .scene-header h2 {
+        font-size: 1.4rem;
+      }
+
+      .controls-info {
+        font-size: 0.75rem;
         padding: 8px 12px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .menu-panel {
+        width: 90%;
+        padding: 20px;
+      }
+
+      .menu-panel h2 {
+        font-size: 1.8rem;
+      }
+
+      .earth-container {
+        width: min(80vmin, 380px);
+        height: min(80vmin, 380px);
+      }
+
+      .area-marker {
+        width: 80px;
+        height: 32px;
+        font-size: 0.7rem;
+      }
+
+      .controls-info {
+        font-size: 0.65rem;
+      }
+
+      .fact-card {
+        width: 90vw;
+      }
+
+      .fact-card h3 {
+        font-size: 1.2rem;
+      }
+
+      .fact-content {
+        font-size: 0.9rem;
+        padding: 10px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div id="earth">
-      <div class="shadow"></div>
+  <div id="app">
+    <!-- HEADER -->
+    <div class="header">
+      <h1>🌍 Terran Explorer</h1>
+      <button class="menu-btn" id="main-menu-btn">Main Menu</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <!-- MENU SCREEN -->
+      <div id="menu-screen" class="screen active">
+        <div class="menu-panel">
+          <h2>Terran Explorer</h2>
+          <p>Explore a rotating Earth! Walk the globe, visit different biomes, and discover amazing Earth science facts.</p>
+          <div class="menu-planet"></div>
+          <button class="start-btn" id="start-btn">Start Adventure</button>
+        </div>
+      </div>
+
+      <!-- EARTH SCREEN -->
+      <div id="earth-screen" class="screen">
+        <div class="earth-container">
+          <div id="earth-globe">
+            <div class="globe-shadow"></div>
+
+            <!-- AREA MARKERS -->
+            <div class="area-marker" data-area="sea">
+              <span class="dot"></span>Sea
+            </div>
+            <div class="area-marker" data-area="volcano">
+              <span class="dot"></span>Volcano
+            </div>
+            <div class="area-marker" data-area="mountain">
+              <span class="dot"></span>Mountain
+            </div>
+            <div class="area-marker" data-area="forest">
+              <span class="dot"></span>Forest
+            </div>
+
+            <!-- CAT PLAYER -->
+            <div class="cat" id="cat">
+              <div class="cat-pixel"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls-info">
+          <strong>🎮 WASD or Arrow Keys to move • Click area to explore • Drag Earth to rotate</strong>
+        </div>
+      </div>
+
+      <!-- INTERIOR SCREEN -->
+      <div id="interior-screen" class="screen">
+        <div class="scene-header">
+          <button class="back-btn" id="back-btn">← Back</button>
+          <h2 id="scene-title">Sea</h2>
+          <div style="width: 120px;"></div>
+        </div>
+
+        <div id="scene" class="scene scene-sea">
+          <!-- Scene content will be injected here -->
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="info">Drag to rotate the Earth</div>
+  <!-- FACT MODAL -->
+  <div id="fact-modal" class="fact-modal">
+    <div class="fact-card">
+      <h3 id="fact-title">Title</h3>
+      <div class="fact-content" id="fact-text">Fact text</div>
+      <button class="close-fact-btn" id="close-fact-btn">Close</button>
+    </div>
+  </div>
 
   <script>
-    const earth = document.getElementById("earth");
-    let rotX = 0;
-    let rotY = 0;
-    let pointerStart = null;
-    let isDragging = false;
+    // ===== CONFIGURATION =====
+    const sceneConfigs = {
+      sea: {
+        title: "Sea / Ocean",
+        class: "scene-sea",
+        content: `
+          <div class="sea-wave w1"></div>
+          <div class="sea-wave w2"></div>
+          <div class="sea-wave w3"></div>
+          <div class="feature fish" data-key="fish" style="left: 12%; top: 58%;"></div>
+          <div class="feature shell" data-key="shell" style="left: 30%; top: 76%;"></div>
+          <div class="feature coral" data-key="coral" style="left: 54%; top: 72%;"></div>
+          <div class="feature sea-plant" data-key="seaPlant" style="left: 74%; top: 62%;"></div>
+          <div class="feature rock" data-key="rock" style="left: 64%; top: 82%;"></div>
+          <div class="feature bubble" data-key="wave" style="left: 18%; top: 24%;"></div>
+          <div class="feature bubble" data-key="wave" style="left: 48%; top: 38%;"></div>
+          <div class="feature bubble" data-key="wave" style="left: 80%; top: 26%;"></div>
+        `
+      },
+      volcano: {
+        title: "Volcano",
+        class: "scene-volcano",
+        content: `
+          <div class="volcano-base"></div>
+          <div class="volcano-mountain"></div>
+          <div class="crater">
+            <div class="lava"></div>
+          </div>
+          <div class="feature magma" data-key="magma" style="left: 18%; top: 57%;"></div>
+          <div class="feature volcanic-rock" data-key="volcanicRock" style="left: 70%; top: 68%;"></div>
+          <div class="feature smoke" data-key="smoke" style="left: 56%; top: 18%;"></div>
+          <div class="feature rock" data-key="rock" style="left: 30%; top: 76%;"></div>
+        `
+      },
+      mountain: {
+        title: "Mountain",
+        class: "scene-mountain",
+        content: `
+          <div class="mountain-peak"></div>
+          <div class="snow-cap"></div>
+          <div class="cloud" style="left: 12%; top: 20%;"></div>
+          <div class="cloud" style="left: 58%; top: 18%;"></div>
+          <div class="feature rock" data-key="rock" style="left: 20%; top: 72%;"></div>
+          <div class="feature water-source" data-key="water" style="left: 62%; top: 76%;"></div>
+          <div class="feature mountain-tree" data-key="tree" style="left: 34%; top: 66%;"></div>
+          <div class="feature mountain-tree" data-key="tree" style="left: 76%; top: 66%;"></div>
+        `
+      },
+      forest: {
+        title: "Forest",
+        class: "scene-forest",
+        content: `
+          <div class="feature forest-tree" data-key="tree" style="left: 18%; top: 58%;"></div>
+          <div class="feature forest-tree" data-key="tree" style="left: 40%; top: 54%;"></div>
+          <div class="feature forest-tree" data-key="tree" style="left: 70%; top: 62%;"></div>
+          <div class="feature forest-plant" data-key="plant" style="left: 28%; top: 76%;"></div>
+          <div class="feature flower" data-key="flower" style="left: 58%; top: 78%;"></div>
+          <div class="feature animal" data-key="animal" style="left: 68%; top: 74%;"></div>
+          <div class="feature mushroom" data-key="mushroom" style="left: 52%; top: 72%;"></div>
+          <div class="feature rock" data-key="rock" style="left: 80%; top: 80%;"></div>
+        `
+      }
+    };
 
-    earth.addEventListener("pointerdown", (e) => {
-      isDragging = true;
-      earth.classList.add("dragging");
-      pointerStart = {
-        x: e.clientX,
-        y: e.clientY,
-        startRotX: rotX,
-        startRotY: rotY
+    const facts = {
+      fish: {
+        title: "Fish",
+        text:
+          "<strong>Fish</strong> use gills to breathe underwater. There are over 30,000 species of fish living in oceans, rivers, and lakes around the world."
+      },
+      shell: {
+        title: "Shell",
+        text:
+          "<strong>Shells</strong> are hard outer coverings that protect sea animals like snails and clams. They're made of calcium and other minerals."
+      },
+      coral: {
+        title: "Coral",
+        text:
+          "<strong>Coral</strong> reefs are made of tiny animals called coral polyps. They form colorful habitats that are home to thousands of marine species."
+      },
+      seaPlant: {
+        title: "Sea Plant",
+        text:
+          "<strong>Sea plants</strong> like seaweed produce oxygen and provide food and shelter for marine life. They also help protect shorelines from erosion."
+      },
+      wave: {
+        title: "Ocean Wave",
+        text:
+          "<strong>Ocean waves</strong> are energy moving through water caused by wind and the Moon's gravity. They shape beaches and help spread nutrients."
+      },
+      rock: {
+        title: "Rock",
+        text:
+          "<strong>Rocks</strong> are made of minerals and form the foundation of Earth's crust. They slowly change through weathering and erosion over millions of years."
+      },
+      magma: {
+        title: "Magma",
+        text:
+          "<strong>Magma</strong> is melted rock deep inside Earth. When it erupts from a volcano and reaches the surface, it's called lava."
+      },
+      volcanicRock: {
+        title: "Volcanic Rock",
+        text:
+          "<strong>Volcanic rocks</strong> form when lava cools and hardens. They help scientists learn about Earth's inner layers and past eruptions."
+      },
+      smoke: {
+        title: "Volcanic Smoke",
+        text:
+          "<strong>Volcanic smoke</strong> is a mix of ash, gases, and particles. It can rise many miles into the air during a major eruption."
+      },
+      water: {
+        title: "Water Source",
+        text:
+          "<strong>Mountain water</strong> comes from snowmelt and rainfall. It feeds rivers, lakes, and underground water supplies that are vital for life."
+      },
+      tree: {
+        title: "Tree",
+        text:
+          "<strong>Trees</strong> use sunlight to make food through photosynthesis. They produce oxygen, prevent soil erosion, and provide homes for countless animals."
+      },
+      plant: {
+        title: "Plant",
+        text:
+          "<strong>Plants</strong> are producers in ecosystems. They turn sunlight into energy and form the base of most food chains on land."
+      },
+      flower: {
+        title: "Flower",
+        text:
+          "<strong>Flowers</strong> help plants reproduce by attracting pollinators like bees and butterflies. The pollen spreads from flower to flower."
+      },
+      animal: {
+        title: "Animal",
+        text:
+          "<strong>Forest animals</strong> help keep ecosystems healthy by spreading seeds, controlling plant growth, and balancing food webs."
+      },
+      mushroom: {
+        title: "Mushroom",
+        text:
+          "<strong>Mushrooms</strong> are fungi that break down dead plant material and return nutrients to the soil, helping new plants grow."
+      }
+    };
+
+    // ===== STATE =====
+    let state = {
+      currentArea: null,
+      globeRotX: 0,
+      globeRotY: 0,
+      catX: 50,
+      catY: 58,
+      pointerStart: null,
+      isDragging: false
+    };
+
+    // ===== DOM ELEMENTS =====
+    const menuScreen = document.getElementById("menu-screen");
+    const earthScreen = document.getElementById("earth-screen");
+    const interiorScreen = document.getElementById("interior-screen");
+    const startBtn = document.getElementById("start-btn");
+    const mainMenuBtn = document.getElementById("main-menu-btn");
+    const backBtn = document.getElementById("back-btn");
+    const earthGlobe = document.getElementById("earth-globe");
+    const cat = document.getElementById("cat");
+    const scene = document.getElementById("scene");
+    const sceneTitle = document.getElementById("scene-title");
+    const factModal = document.getElementById("fact-modal");
+    const factTitle = document.getElementById("fact-title");
+    const factText = document.getElementById("fact-text");
+    const closeFactBtn = document.getElementById("close-fact-btn");
+
+    // ===== SCREEN MANAGEMENT =====
+    function showScreen(screenName) {
+      menuScreen.classList.remove("active");
+      earthScreen.classList.remove("active");
+      interiorScreen.classList.remove("active");
+      factModal.classList.remove("show");
+
+      if (screenName === "menu") menuScreen.classList.add("active");
+      if (screenName === "earth") earthScreen.classList.add("active");
+      if (screenName === "interior") interiorScreen.classList.add("active");
+    }
+
+    function closeFactModal() {
+      factModal.classList.remove("show");
+    }
+
+    // ===== CAT MOVEMENT =====
+    function updateCatPosition() {
+      cat.style.left = `${state.catX}%`;
+      cat.style.top = `${state.catY}%`;
+    }
+
+    function moveCat(dx, dy) {
+      state.catX = Math.min(96, Math.max(4, state.catX + dx));
+      state.catY = Math.min(90, Math.max(12, state.catY + dy));
+      updateCatPosition();
+    }
+
+    function getAreaNear() {
+      const areas = {
+        sea: { x: 52, y: 62 },
+        volcano: { x: 18, y: 36 },
+        mountain: { x: 62, y: 20 },
+        forest: { x: 68, y: 72 }
       };
+
+      let nearest = null;
+      let minDist = Infinity;
+
+      Object.entries(areas).forEach(([key, pos]) => {
+        const dist = Math.hypot(pos.x - state.catX, pos.y - state.catY);
+        if (dist < minDist) {
+          nearest = key;
+          minDist = dist;
+        }
+      });
+
+      return minDist < 10 ? nearest : null;
+    }
+
+    // ===== SCENE LOADING =====
+    function loadScene(areaKey) {
+      const config = sceneConfigs[areaKey];
+      if (!config) return;
+
+      state.currentArea = areaKey;
+      sceneTitle.textContent = config.title;
+      scene.className = `scene ${config.class}`;
+      scene.innerHTML = config.content;
+
+      document.querySelectorAll(".feature").forEach((element) => {
+        element.addEventListener("click", (e) => {
+          const key = element.dataset.key;
+          if (facts[key]) {
+            factTitle.textContent = facts[key].title;
+            factText.innerHTML = facts[key].text;
+            factModal.classList.add("show");
+          }
+        });
+      });
+
+      showScreen("interior");
+    }
+
+    // ===== GLOBE ROTATION =====
+    function attachGlobeRotation() {
+      earthGlobe.addEventListener("pointerdown", (e) => {
+        state.isDragging = true;
+        state.pointerStart = {
+          x: e.clientX,
+          y: e.clientY,
+          startRotX: state.globeRotX,
+          startRotY: state.globeRotY
+        };
+        earthGlobe.classList.add("dragging");
+      });
+
+      window.addEventListener("pointermove", (e) => {
+        if (!state.isDragging || !state.pointerStart) return;
+
+        const dx = e.clientX - state.pointerStart.x;
+        const dy = e.clientY - state.pointerStart.y;
+
+        state.globeRotY = state.pointerStart.startRotY + dx * 0.5;
+        state.globeRotX = Math.max(-25, Math.min(25, state.pointerStart.startRotX - dy * 0.4));
+
+        earthGlobe.style.transform = `rotateX(${state.globeRotX}deg) rotateY(${state.globeRotY}deg)`;
+      });
+
+      window.addEventListener("pointerup", () => {
+        state.isDragging = false;
+        earthGlobe.classList.remove("dragging");
+        state.pointerStart = null;
+      });
+    }
+
+    // ===== KEYBOARD =====
+    document.addEventListener("keydown", (e) => {
+      const key = e.key.toLowerCase();
+      if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"].includes(key))
+        e.preventDefault();
+
+      if (key === "arrowup" || key === "w") moveCat(0, -2.5);
+      if (key === "arrowdown" || key === "s") moveCat(0, 2.5);
+      if (key === "arrowleft" || key === "a") moveCat(-2.5, 0);
+      if (key === "arrowright" || key === "d") moveCat(2.5, 0);
+      if (key === "enter") {
+        const nearby = getAreaNear();
+        if (nearby) loadScene(nearby);
+      }
     });
 
-    window.addEventListener("pointermove", (e) => {
-      if (!isDragging || !pointerStart) return;
-
-      const dx = e.clientX - pointerStart.x;
-      const dy = e.clientY - pointerStart.y;
-
-      rotY = pointerStart.startRotY + dx * 0.5;
-      rotX = Math.max(-30, Math.min(30, pointerStart.startRotX - dy * 0.5));
-
-      earth.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    // ===== AREA MARKERS =====
+    document.querySelectorAll(".area-marker").forEach((marker) => {
+      marker.addEventListener("click", () => {
+        loadScene(marker.dataset.area);
+      });
     });
 
-    window.addEventListener("pointerup", () => {
-      isDragging = false;
-      earth.classList.remove("dragging");
-      pointerStart = null;
+    // ===== BUTTON EVENTS =====
+    startBtn.addEventListener("click", () => {
+      showScreen("earth");
+      updateCatPosition();
     });
 
-    window.addEventListener("touchmove", (e) => {
-      if (isDragging) e.preventDefault();
-    }, { passive: false });
+    mainMenuBtn.addEventListener("click", () => {
+      showScreen("menu");
+    });
+
+    backBtn.addEventListener("click", () => {
+      showScreen("earth");
+      updateCatPosition();
+    });
+
+    closeFactBtn.addEventListener("click", closeFactModal);
+    factModal.addEventListener("click", (e) => {
+      if (e.target === factModal) closeFactModal();
+    });
+
+    // ===== INIT =====
+    attachGlobeRotation();
+    updateCatPosition();
   </script>
 </body>
 </html>
