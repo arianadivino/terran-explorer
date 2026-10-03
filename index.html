@@ -3,27 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Terran Explorer - Half Earth</title>
+  <title>Terran Explorer</title>
   <style>
     :root {
       --sky: #8ed8ff;
-      --sea: #52c8ff;
-      --sea-deep: #1d7ec7;
-      --grass: #9adf6d;
-      --grass-2: #7ecf5d;
-      --mountain: #b18a5d;
-      --mountain-2: #7d623f;
-      --snow: #eff7ff;
-      --forest: #3c8d51;
-      --panel: rgba(255,255,255,0.7);
-      --ink: #1d314a;
-      --shadow: #12355c;
-      --button: #ffd768;
-      --button-red: #ff8d6d;
-      --button-green: #83df88;
-      --button-dark: #d59827;
-      --button-red-dark: #d8644d;
-      --button-green-dark: #4ea861;
+      --sky-2: #dff7ff;
+      --ink: #17314e;
+      --ink-2: #0e2132;
+      --panel: rgba(255,255,255,0.32);
+      --panel-strong: rgba(255,255,255,0.8);
+      --button-yellow: #ffd76c;
+      --button-green: #7fe192;
+      --button-red: #ff8c72;
+      --button-blue: #80d2ff;
+      --pixel-dark: #11345a;
+      --pixel-dark-2: #0b2138;
+      --sea: #53c4ff;
+      --sea-deep: #1c7ec7;
+      --land: #9edc67;
+      --land-2: #7ecf5d;
+      --mountain: #a9825d;
+      --mountain-2: #785a3d;
+      --snow: #eef8ff;
+      --lava: #ff7c32;
+      --forest: #3d8c54;
+      --shadow: rgba(0,0,0,0.14);
     }
 
     * { box-sizing: border-box; }
@@ -32,7 +36,7 @@
       margin: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(to bottom, #8ed8ff 0%, #dff7ff 100%);
+      background: linear-gradient(to bottom, var(--sky), var(--sky-2));
       font-family: "Trebuchet MS", "Segoe UI", sans-serif;
       color: var(--ink);
       overflow: hidden;
@@ -44,15 +48,20 @@
       justify-content: center;
     }
 
-    #app {
-      position: relative;
-      width: min(1120px, 96vw);
-      height: min(760px, 96vh);
-      border: 6px solid var(--shadow);
-      border-radius: 18px;
-      background: linear-gradient(to bottom, #9fe4ff 0%, #dcefff 100%);
-      box-shadow: 0 14px 0 rgba(17, 53, 89, 0.18);
-      overflow: hidden;
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: 4px solid var(--pixel-dark-2);
+      border-radius: 12px;
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.72) inset, 0 6px 0 rgba(0,0,0,0.15);
+      transition: transform 0.1s ease, filter 0.12s ease;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    button:active {
+      transform: translateY(3px);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.72) inset, 0 3px 0 rgba(0,0,0,0.1);
     }
 
     .screen {
@@ -61,7 +70,7 @@
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transition: opacity 0.22s ease, visibility 0.22s ease;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
     }
 
     .screen.active {
@@ -70,884 +79,781 @@
       pointer-events: auto;
     }
 
-    .topbar {
-      position: absolute;
-      left: 0;
-      top: 0;
-      right: 0;
-      height: 70px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 18px;
-      z-index: 25;
-      background: rgba(255,255,255,0.2);
-      border-bottom: 5px solid var(--shadow);
-    }
-
-    .topbar h1 {
-      margin: 0;
-      font-size: clamp(1.5rem, 2vw, 2.2rem);
-      letter-spacing: 1px;
-      color: var(--ink);
-      text-shadow: 2px 2px 0 rgba(255,255,255,0.4);
-    }
-
-    button {
-      font: inherit;
-      cursor: pointer;
-      border: 4px solid var(--shadow);
-      border-radius: 12px;
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.7) inset, 0 6px 0 rgba(0,0,0,0.15);
-      font-weight: 800;
-      transition: transform 0.12s ease;
-    }
-
-    button:active {
-      transform: translateY(3px);
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.7) inset, 0 3px 0 rgba(0,0,0,0.12);
-    }
-
-    .mini-btn {
-      background: var(--button);
-      color: var(--ink);
-      padding: 8px 14px;
-      font-size: 0.8rem;
-    }
-
-    .big-btn {
-      background: var(--button-green);
-      color: var(--ink);
-      padding: 16px 28px;
-      font-size: 1.1rem;
-      min-width: 190px;
-    }
-
-    /* Earth screen */
-    #earth-screen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding-top: 70px;
-    }
-
-    .earth-wrap {
+    #app {
       position: relative;
-      width: min(62vw, 620px);
-      height: min(62vw, 620px);
+      width: min(1180px, 96vw);
+      height: min(820px, 96vh);
+      background: linear-gradient(180deg, #9fe3ff 0%, #dff7ff 100%);
+      border: 6px solid var(--pixel-dark-2);
+      border-radius: 20px;
+      box-shadow: 0 18px 0 rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+
+    /* START PAGE */
+    #start-screen {
+      background: linear-gradient(180deg, #97d8ff 0%, #dff8ff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .logo-box {
+      width: min(880px, 90%);
+      text-align: center;
+      position: relative;
+      padding: 18px 16px 24px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(2.2rem, 4vw, 4.2rem);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-shadow: 4px 4px 0 rgba(255,255,255,0.45);
+      color: var(--ink);
+    }
+
+    .subtitle {
+      margin: 10px 0 18px;
+      font-size: clamp(1rem, 1.8vw, 1.55rem);
+      line-height: 1.5;
+      color: var(--ink);
+      text-shadow: 2px 2px 0 rgba(255,255,255,0.38);
+      max-width: 760px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .earth-showcase {
+      width: min(58vw, 520px);
+      height: min(58vw, 520px);
+      margin: 0 auto 20px;
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    #earthCanvas {
+    .earth-planet {
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      background: transparent;
-      display: block;
-      cursor: grab;
-      image-rendering: pixelated;
-      filter: saturate(1.1);
-      touch-action: none;
-    }
-
-    #earthCanvas.dragging { cursor: grabbing; }
-
-    .rotation-controls {
-      position: absolute;
-      left: 20px;
-      bottom: 20px;
-      display: flex;
-      gap: 12px;
-      z-index: 20;
-    }
-
-    .rotation-btn {
-      background: var(--button);
-      color: var(--ink);
-      padding: 10px 18px;
-      font-size: 0.9rem;
-    }
-
-    .hint {
-      position: absolute;
-      right: 20px;
-      bottom: 20px;
-      background: rgba(255,255,255,0.72);
-      border: 4px solid var(--shadow);
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-size: 0.8rem;
-      font-weight: 800;
-      box-shadow: 0 4px 0 rgba(0,0,0,0.12);
-      z-index: 20;
-    }
-
-    /* Menu screen */
-    #menu-screen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(to bottom, #8fd9ff 0%, #dff6ff 100%);
-    }
-
-    .menu-panel {
-      width: min(680px, 80vw);
-      background: rgba(255,255,255,0.3);
-      border: 6px solid var(--shadow);
-      border-radius: 20px;
-      padding: 28px 26px 30px;
-      text-align: center;
-      box-shadow: 0 12px 0 rgba(32,74,111,0.12);
-    }
-
-    .menu-panel h2 {
-      margin: 0 0 12px;
-      font-size: clamp(2.1rem, 4vw, 3.2rem);
-      letter-spacing: 2px;
-      color: var(--ink);
-      text-shadow: 2px 2px 0 rgba(255,255,255,0.45);
-    }
-
-    .menu-panel p {
-      font-size: clamp(1rem, 1.8vw, 1.25rem);
-      line-height: 1.6;
-      margin: 0 0 20px;
-    }
-
-    .planet-demo {
-      width: 220px;
-      height: 220px;
-      margin: 10px auto 22px;
-      border-radius: 50%;
-      border: 7px solid var(--shadow);
-      background: linear-gradient(135deg, #5ec7ff 0%, #2d95ea 35%, #0d5fa5 70%, #1d4578 100%);
-      box-shadow: inset -18px -18px 0 rgba(0,0,0,0.12), 0 15px 0 rgba(0,0,0,0.18);
       position: relative;
+      border: 8px solid var(--pixel-dark-2);
+      background: linear-gradient(135deg, #5bcfff 0%, #2e9ae6 32%, #0e5fa6 60%, #1e4678 100%);
+      box-shadow: inset -20px -20px 0 rgba(0,0,0,0.12), 0 22px 0 rgba(0,0,0,0.16);
       overflow: hidden;
-      animation: floatPlanet 4s ease-in-out infinite;
+      animation: floatEarth 4.5s ease-in-out infinite;
     }
 
-    .planet-demo::before {
+    .earth-planet::before {
       content: "";
       position: absolute;
       inset: 0;
       border-radius: 50%;
       background:
-        radial-gradient(circle at 35% 30%, rgba(255,255,255,0.6), transparent 18%),
-        radial-gradient(circle at 60% 64%, rgba(123, 219, 129, 0.9), transparent 18%),
-        radial-gradient(circle at 72% 38%, rgba(123, 219, 129, 0.75), transparent 18%),
-        radial-gradient(circle at 35% 70%, rgba(123, 219, 129, 0.78), transparent 18%);
+        radial-gradient(circle at 30% 35%, rgba(255,255,255,0.5), transparent 18%),
+        radial-gradient(circle at 50% 66%, rgba(120, 214, 110, 0.9), transparent 18%),
+        radial-gradient(circle at 72% 40%, rgba(124, 216, 112, 0.88), transparent 16%),
+        radial-gradient(circle at 62% 72%, rgba(122, 216, 112, 0.8), transparent 14%),
+        radial-gradient(circle at 30% 22%, rgba(125, 214, 111, 0.75), transparent 16%);
     }
 
-    .planet-demo::after {
+    .earth-planet::after {
       content: "";
       position: absolute;
       inset: 0;
       border-radius: 50%;
-      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 32%, transparent 42%);
+      background: linear-gradient(90deg, rgba(255,255,255,0.18), transparent 36%, rgba(0,0,0,0.10));
     }
 
-    /* Interior scenes */
-    #interior-screen {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .scene-head {
-      position: relative;
-      z-index: 20;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 18px;
-      background: rgba(255,255,255,0.35);
-      border-bottom: 5px solid var(--shadow);
-      gap: 10px;
-    }
-
-    .scene-head h3 {
-      margin: 0;
-      font-size: clamp(1.2rem, 2vw, 2rem);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--ink);
-      text-shadow: 2px 2px 0 rgba(255,255,255,0.35);
-    }
-
-    .scene {
-      position: relative;
-      flex: 1;
-      overflow: hidden;
-    }
-
-    .sea-scene { background: linear-gradient(to bottom, #7ad9ff 0%, #3b9ce3 32%, #1a4f97 100%); }
-    .volcano-scene { background: linear-gradient(to bottom, #4d2d2d 0%, #8c3d31 42%, #1f1818 100%); }
-    .mountain-scene { background: linear-gradient(to bottom, #c9ecff 0%, #edf7ff 58%, #d9efff 100%); }
-    .forest-scene { background: linear-gradient(to bottom, #7bd0a4 0%, #5fb781 34%, #356c4d 100%); }
-
-    .feature {
+    .feature-tag {
       position: absolute;
-      cursor: pointer;
-      user-select: none;
-      transition: transform 0.12s ease;
+      background: rgba(255,255,255,0.72);
+      border: 4px solid var(--pixel-dark-2);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      box-shadow: 0 5px 0 rgba(0,0,0,0.1);
     }
 
-    .feature:hover {
-      transform: translateY(-2px) scale(1.05);
-    }
+    .tag-sea { left: 50%; top: 68%; }
+    .tag-volcano { left: 18%; top: 46%; }
+    .tag-mountain { left: 66%; top: 20%; }
+    .tag-forest { left: 72%; top: 70%; }
 
-    .fish {
-      width: 54px;
-      height: 24px;
-      background: linear-gradient(90deg, #f2d36a, #f7a650);
-      border: 4px solid var(--shadow);
-      border-radius: 18px 12px 12px 18px;
-      position: relative;
-    }
-
-    .fish::before {
-      content: "";
-      position: absolute;
-      right: -12px;
-      top: 50%;
-      width: 0;
-      height: 0;
-      transform: translateY(-50%);
-      border-top: 8px solid transparent;
-      border-bottom: 8px solid transparent;
-      border-left: 14px solid #ffda74;
-    }
-
-    .fish::after {
-      content: "";
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      width: 6px;
-      height: 6px;
-      background: var(--shadow);
-      border-radius: 50%;
-      transform: translateY(-50%);
-    }
-
-    .shell {
-      width: 32px;
-      height: 24px;
-      background: linear-gradient(180deg, #f7dfbg, #dab071);
-      border: 4px solid var(--shadow);
-      border-radius: 50% 50% 42% 42%;
-      position: relative;
-    }
-
-    .shell::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 8px;
-      width: 12px;
-      height: 10px;
-      border: 3px solid rgba(0,0,0,0.15);
-      border-radius: 50%;
-      transform: translateX(-50%);
-    }
-
-    .coral {
-      width: 42px;
-      height: 68px;
-      background: linear-gradient(180deg, #ff8f67, #d74843);
-      border: 4px solid var(--shadow);
-      clip-path: polygon(50% 0%, 100% 30%, 78% 100%, 22% 100%, 0% 30%);
-      position: relative;
-    }
-
-    .seaplant {
-      width: 16px;
-      height: 82px;
-      background: linear-gradient(180deg, #87f2a0, #42b66e);
-      border: 4px solid var(--shadow);
-      border-radius: 18px;
-      position: relative;
-    }
-
-    .bubble {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.45);
-      border: 3px solid rgba(255,255,255,0.8);
-      animation: bubbleRise 4s ease-in-out infinite;
-    }
-
-    .rock {
-      width: 52px;
-      height: 34px;
-      background: linear-gradient(180deg, #8d8e97, #5e646e);
-      border: 4px solid var(--shadow);
-      clip-path: polygon(12% 100%, 0% 70%, 20% 15%, 40% 0%, 70% 14%, 100% 0%, 100% 62%, 88% 100%);
-    }
-
-    .wave {
-      position: absolute;
-      left: -10%;
-      right: -10%;
-      height: 110px;
-      border-top: 5px solid rgba(255,255,255,0.6);
-      background: rgba(125, 206, 255, 0.32);
-      border-radius: 50% 50% 0 0;
-      animation: waveShift 5s ease-in-out infinite alternate;
-    }
-
-    .wave.w1 { bottom: 180px; }
-    .wave.w2 { bottom: 110px; animation-delay: 0.7s; }
-    .wave.w3 { bottom: 44px; animation-delay: 1.4s; }
-
-    .volcano-mountain {
-      position: absolute;
-      left: 50%;
-      bottom: 10%;
-      width: 420px;
-      height: 300px;
-      transform: translateX(-50%);
-      background: linear-gradient(180deg, #563a39 0%, #251c1d 100%);
-      border: 6px solid var(--shadow);
-      clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
-      z-index: 1;
-    }
-
-    .crater {
-      position: absolute;
-      left: 50%;
-      bottom: 8%;
-      width: 180px;
-      height: 120px;
-      transform: translateX(-50%);
-      background: radial-gradient(circle at 50% 40%, #ffb454 0%, #ed5d2b 30%, #3d1717 60%, #120a0a 100%);
-      border: 5px solid var(--shadow);
-      border-radius: 52% 48% 46% 54%;
-      z-index: 2;
-      overflow: hidden;
-    }
-
-    .lava {
-      position: absolute;
-      inset: 16% 10% 8% 10%;
-      background: radial-gradient(circle at 50% 35%, #ffd46d 0%, #ff8c3f 25%, #ff5a2a 55%, rgba(145,15,15,0.8) 100%);
-      border-radius: 50%;
-      animation: lavaPulse 1.4s ease-in-out infinite alternate;
-    }
-
-    .smoke {
-      width: 48px;
-      height: 78px;
-      background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.7), rgba(255,255,255,0.15) 52%, transparent 72%);
-      border-radius: 50%;
-      filter: blur(2px);
-      animation: smokeRise 4s ease-in-out infinite;
-    }
-
-    .magma {
-      width: 80px;
-      height: 52px;
-      background: linear-gradient(180deg, #ffba59, #ff552d);
-      border: 4px solid var(--shadow);
-      border-radius: 30% 30% 36% 36%;
-    }
-
-    .volcanic-rock {
-      width: 60px;
-      height: 38px;
-      background: linear-gradient(180deg, #886058, #4c3735);
-      border: 4px solid var(--shadow);
-      clip-path: polygon(12% 100%, 0% 62%, 25% 10%, 60% 0%, 100% 18%, 90% 100%);
-    }
-
-    .mountain-peak {
-      position: absolute;
-      left: 50%;
-      bottom: 12%;
-      width: 360px;
-      height: 210px;
-      transform: translateX(-50%);
-      background: linear-gradient(180deg, #b0c6d8, #7b8e9f);
-      border: 6px solid var(--shadow);
-      clip-path: polygon(0% 100%, 22% 56%, 34% 36%, 52% 14%, 67% 38%, 78% 62%, 100% 100%);
-      z-index: 1;
-    }
-
-    .snow-cap {
-      position: absolute;
-      left: 50%;
-      bottom: 34%;
-      width: 180px;
-      height: 90px;
-      transform: translateX(-50%);
-      background: linear-gradient(180deg, #ffffff, #dfeeff);
-      border: 5px solid var(--shadow);
-      clip-path: polygon(0% 100%, 22% 28%, 42% 13%, 54% 0%, 64% 14%, 78% 26%, 100% 100%);
-      z-index: 2;
-    }
-
-    .mountain-cloud {
-      width: 130px;
-      height: 36px;
-      background: linear-gradient(180deg, #f6fdff, #c9ebff);
-      border: 4px solid var(--shadow);
-      border-radius: 22px;
-      position: absolute;
-      animation: cloudFloat 12s ease-in-out infinite alternate;
-    }
-
-    .mountain-cloud::before,
-    .mountain-cloud::after {
-      content: "";
-      position: absolute;
-      border-radius: 50%;
-      background: inherit;
-      border: 4px solid var(--shadow);
-    }
-
-    .mountain-cloud::before {
-      width: 34px;
-      height: 34px;
-      left: 16px;
-      top: -20px;
-    }
-
-    .mountain-cloud::after {
-      width: 42px;
-      height: 40px;
-      right: 18px;
-      top: -18px;
-    }
-
-    .mountain-tree {
-      width: 20px;
-      height: 54px;
-      background: linear-gradient(180deg, #a67754, #724e2f);
-      border: 4px solid var(--shadow);
-      border-radius: 6px;
-      position: relative;
-    }
-
-    .mountain-tree::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: -30px;
-      width: 62px;
-      height: 52px;
-      transform: translateX(-50%);
-      background: linear-gradient(180deg, #72d48a, #409d5b);
-      border: 4px solid var(--shadow);
-      clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
-    }
-
-    .water-source {
-      width: 100px;
-      height: 44px;
-      background: linear-gradient(180deg, #76dcff, #34a0de);
-      border: 4px solid var(--shadow);
-      border-radius: 50% 50% 44% 44%;
-      position: relative;
-    }
-
-    .forest-tree {
-      width: 20px;
-      height: 56px;
-      background: linear-gradient(180deg, #a67654, #714d2d);
-      border: 4px solid var(--shadow);
-      border-radius: 6px;
-      position: relative;
-    }
-
-    .forest-tree::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: -38px;
-      width: 80px;
-      height: 70px;
-      transform: translateX(-50%);
-      background: linear-gradient(180deg, #69d180, #2da060);
-      border: 4px solid var(--shadow);
-      clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
-    }
-
-    .forest-plant {
-      width: 28px;
-      height: 18px;
-      background: linear-gradient(180deg, #8af0a5, #4db96b);
-      border: 4px solid var(--shadow);
-      border-radius: 8px 8px 12px 12px;
-      position: relative;
-    }
-
-    .flower {
-      width: 16px;
-      height: 16px;
-      background: radial-gradient(circle at center, #fff8d0 0 26%, #ff75b7 26% 56%, #ff5f8b 56% 100%);
-      border: 4px solid var(--shadow);
-      border-radius: 50%;
-      position: relative;
-    }
-
-    .animal {
-      width: 54px;
-      height: 26px;
-      background: linear-gradient(90deg, #b4835d, #7e4e38);
-      border: 4px solid var(--shadow);
-      border-radius: 20px 14px 14px 18px;
-      position: relative;
-    }
-
-    .animal::before {
-      content: "";
-      position: absolute;
-      right: 7px;
-      top: 8px;
-      width: 7px;
-      height: 7px;
-      background: var(--shadow);
-      border-radius: 50%;
-    }
-
-    .mushroom {
-      width: 26px;
-      height: 40px;
-      background: linear-gradient(180deg, #ff9aa3, #d76a75);
-      border: 4px solid var(--shadow);
-      border-radius: 12px 12px 18px 18px;
-      position: relative;
-    }
-
-    .mushroom::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: -15px;
-      width: 36px;
-      height: 18px;
-      transform: translateX(-50%);
-      background: linear-gradient(180deg, #f7d5dd, #ebacb5);
-      border: 4px solid var(--shadow);
-      border-radius: 50% 50% 18% 18%;
-    }
-
-    .fact-modal {
-      position: absolute;
-      inset: 0;
-      background: rgba(7, 22, 35, 0.72);
+    .menu-actions {
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 60;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .menu-btn {
+      min-width: 250px;
+      padding: 18px 26px;
+      font-size: 1.02rem;
+      background: var(--button-yellow);
+      color: var(--ink);
+    }
+
+    .menu-btn.alt {
+      background: var(--button-green);
+    }
+
+    /* Definitions screen */
+    #definitions-screen {
+      background: linear-gradient(180deg, #9fe0ff 0%, #dff8ff 100%);
+      padding: 16px;
+    }
+
+    .screen-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 8px 8px 0;
+    }
+
+    .screen-header h2 {
+      margin: 0;
+      font-size: clamp(1.5rem, 2vw, 2.2rem);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-shadow: 2px 2px 0 rgba(255,255,255,0.32);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      background: var(--button-yellow);
+      color: var(--ink);
+      padding: 10px 16px;
+      font-size: 0.82rem;
+    }
+
+    .nav-btn.secondary {
+      background: var(--button-blue);
+    }
+
+    .definitions-content {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 14px;
+      height: calc(100% - 76px);
+      padding: 12px 8px 0;
+    }
+
+    .globe-panel,
+    .info-panel {
+      background: rgba(255,255,255,0.35);
+      border: 5px solid var(--pixel-dark-2);
+      border-radius: 18px;
+      box-shadow: 0 10px 0 rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+
+    .globe-panel {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.08));
+    }
+
+    .mini-globe-box {
+      position: relative;
+      width: min(60vw, 520px);
+      height: min(60vw, 520px);
+      max-width: 520px;
+      max-height: 520px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+      touch-action: none;
+      image-rendering: pixelated;
+      border-radius: 50%;
+    }
+
+    canvas.dragging { cursor: grabbing; }
+
+    .rot-btns {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+
+    .rot-btn {
+      background: var(--button-yellow);
+      color: var(--ink);
+      padding: 9px 14px;
+      font-size: 0.78rem;
+    }
+
+    .info-panel {
+      padding: 18px 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      gap: 8px;
+      max-height: 220px;
+      overflow: auto;
+      padding-right: 6px;
+    }
+
+    .feature-chip {
+      background: rgba(255,255,255,0.7);
+      border: 4px solid var(--pixel-dark-2);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.12s ease;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .feature-chip:hover {
+      transform: translateY(-2px);
+    }
+
+    .feature-card {
+      background: rgba(255,255,255,0.75);
+      border: 4px solid var(--pixel-dark-2);
+      border-radius: 12px;
+      padding: 12px 12px 14px;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .feature-card h3 {
+      margin: 0;
+      text-align: center;
+      font-size: clamp(1.2rem, 2vw, 1.7rem);
+      text-transform: uppercase;
+    }
+
+    .feature-card .label {
+      font-weight: 900;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      color: var(--ink);
+      letter-spacing: 0.8px;
+      text-align: center;
+    }
+
+    .feature-card p {
+      margin: 0;
+      line-height: 1.55;
+      font-size: 0.96rem;
+    }
+
+    .icon-box {
+      width: 56px;
+      height: 56px;
+      margin: 2px auto 0;
+      background: linear-gradient(180deg, #fff, #d9f0ff);
+      border: 4px solid var(--pixel-dark-2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+    }
+
+    .how-to-play {
+      margin-top: 10px;
+      background: var(--button-green);
+      color: var(--ink);
+      padding: 11px 18px;
+      font-size: 0.9rem;
+      align-self: flex-start;
+    }
+
+    .back-btn {
+      background: var(--button-red);
+      color: var(--ink);
+      padding: 11px 18px;
+      font-size: 0.9rem;
+      align-self: flex-end;
+    }
+
+    /* Character select */
+    #character-screen {
+      background: linear-gradient(180deg, #a5e1ff 0%, #e8fbff 100%);
+      padding: 16px;
+    }
+
+    .select-panel {
+      width: min(900px, 88vw);
+      margin: 0 auto;
+      background: rgba(255,255,255,0.35);
+      border: 6px solid var(--pixel-dark-2);
+      border-radius: 24px;
+      padding: 18px 16px 22px;
+      box-shadow: 0 12px 0 rgba(0,0,0,0.12);
+    }
+
+    .select-panel h2 {
+      margin: 10px 0 16px;
+      text-align: center;
+      font-size: clamp(1.9rem, 3vw, 3rem);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-shadow: 2px 2px 0 rgba(255,255,255,0.3);
+    }
+
+    .chars {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 16px;
+      margin: 10px 0 20px;
+    }
+
+    .char-card {
+      background: rgba(255,255,255,0.7);
+      border: 5px solid var(--pixel-dark-2);
+      border-radius: 16px;
+      padding: 14px 10px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.12s ease, border-color 0.12s ease;
+      min-height: 180px;
+    }
+
+    .char-card.selected {
+      border-color: #3d8d54;
+      box-shadow: 0 0 0 3px rgba(67, 176, 92, 0.3), 0 8px 0 rgba(0,0,0,0.08);
+      background: rgba(235,255,240,0.9);
+    }
+
+    .char-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .char-illustration {
+      width: 78px;
+      height: 78px;
+      margin: 0 auto 8px;
+      position: relative;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #d7f5ff, #bfe6ff);
+      border: 4px solid var(--pixel-dark-2);
+    }
+
+    .char-illustration::before {
+      content: "";
+      position: absolute;
+      inset: 12px 18px 12px 18px;
+      background: #f4c58a;
+      border: 4px solid var(--pixel-dark-2);
+      border-radius: 12px;
+    }
+
+    .char-illustration::after {
+      content: "";
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: 12px;
+      height: 18px;
+      background: #f4c58a;
+      border: 4px solid var(--pixel-dark-2);
+      border-radius: 10px;
+    }
+
+    .char-card:nth-child(2) .char-illustration::before {
+      background: #f2d38d;
+    }
+
+    .char-card:nth-child(3) .char-illustration::before {
+      background: #b7cfed;
+    }
+
+    .char-card:nth-child(4) .char-illustration::before {
+      background: #d1a9f1;
+    }
+
+    .char-name {
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.82rem;
+      color: var(--ink);
+    }
+
+    .select-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .next-btn {
+      background: var(--button-green);
+      color: var(--ink);
+      padding: 14px 26px;
+      font-size: 0.96rem;
+    }
+
+    /* How to play modal */
+    .modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(6,22,35,0.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.2s ease, visibility 0.2s ease;
     }
 
-    .fact-modal.show {
+    .modal.show {
       opacity: 1;
       visibility: visible;
     }
 
-    .fact-card {
-      width: min(520px, 80vw);
-      background: linear-gradient(180deg, #ebfbff, #d7f0ff);
-      border: 6px solid var(--shadow);
+    .modal-card {
+      width: min(560px, 82vw);
+      background: linear-gradient(180deg, #ebfbff, #d4f0ff);
+      border: 6px solid var(--pixel-dark-2);
       border-radius: 20px;
-      padding: 18px 18px 20px;
-      box-shadow: 0 14px 0 rgba(0,0,0,0.18);
+      box-shadow: 0 18px 0 rgba(0,0,0,0.18);
+      padding: 16px 18px 18px;
     }
 
-    .fact-card h4 {
-      margin: 0 0 12px;
+    .modal-card h3 {
+      margin: 0 0 14px;
       text-align: center;
-      font-size: clamp(1.2rem, 2.2vw, 1.8rem);
-      letter-spacing: 1px;
+      font-size: clamp(1.5rem, 2vw, 2rem);
       text-transform: uppercase;
-      color: var(--ink);
+      letter-spacing: 1px;
     }
 
-    .fact-content {
-      background: rgba(255,255,255,0.72);
-      border: 4px solid var(--shadow);
-      border-radius: 12px;
-      padding: 14px;
+    .modal-card ol {
+      margin: 0;
+      padding-left: 22px;
       line-height: 1.7;
-      color: var(--ink);
-      text-align: center;
-      font-size: clamp(1rem, 1.8vw, 1.2rem);
-    }
-
-    .close-fact {
-      margin-top: 16px;
-      width: 100%;
-      background: var(--button-red);
-      color: var(--ink);
-      padding: 12px 18px;
       font-size: 1rem;
     }
 
-    @keyframes floatPlanet {
+    .modal-card button {
+      margin-top: 14px;
+      width: 100%;
+      background: var(--button-yellow);
+      color: var(--ink);
+      padding: 12px 18px;
+    }
+
+    @keyframes floatEarth {
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-10px); }
     }
 
-    @keyframes waveShift {
-      0% { transform: translateX(-2%) scaleY(1); }
-      100% { transform: translateX(2%) scaleY(1.08); }
-    }
-
-    @keyframes bubbleRise {
-      0% { transform: translateY(22px) scale(0.8); opacity: 0; }
-      15% { opacity: 1; }
-      100% { transform: translateY(-140px) scale(1.2); opacity: 0; }
-    }
-
-    @keyframes lavaPulse {
-      0% { transform: scale(0.96); filter: brightness(0.95); }
-      100% { transform: scale(1.05); filter: brightness(1.1); }
-    }
-
-    @keyframes smokeRise {
-      0% { opacity: 0; transform: translate(0,18px) scale(0.7); }
-      25% { opacity: 0.7; }
-      100% { opacity: 0; transform: translate(12px,-90px) scale(1.5); }
-    }
-
-    @keyframes cloudFloat {
-      0% { transform: translateX(-12px); }
-      100% { transform: translateX(12px); }
-    }
-
-    @media (max-width: 760px) {
-      .rotation-controls {
-        left: 12px;
-        bottom: 12px;
+    @media (max-width: 800px) {
+      .definitions-content {
+        grid-template-columns: 1fr;
       }
 
-      .hint {
-        right: 12px;
-        bottom: 12px;
-        padding: 6px 10px;
-        font-size: 0.7rem;
+      .chars {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      #app {
+        width: 96vw;
+        height: 96vh;
+      }
+
+      .menu-btn {
+        min-width: 220px;
+      }
+
+      .feature-list {
+        grid-template-columns: repeat(2, minmax(110px, 1fr));
+      }
+
+      .chars {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
   <div id="app">
-    <div id="menu-screen" class="screen active">
-      <div class="menu-panel">
-        <h2>Terran Explorer</h2>
-        <p>Explore Earth's amazing environments, learn Earth science facts, and travel across a rotating half-world.</p>
-        <div class="planet-demo"></div>
-        <button class="big-btn" id="startBtn">Start Adventure</button>
+    <div id="start-screen" class="screen active">
+      <div class="logo-box">
+        <h1 class="title">Terran Explorer</h1>
+        <div class="subtitle">A Digital Game-Based Learning Tool for Earth Science Education</div>
+
+        <div class="earth-showcase">
+          <div class="earth-planet"></div>
+          <div class="feature-tag tag-sea">Sea</div>
+          <div class="feature-tag tag-volcano">Volcano</div>
+          <div class="feature-tag tag-mountain">Mountain</div>
+          <div class="feature-tag tag-forest">Forest</div>
+        </div>
+
+        <div class="menu-actions">
+          <button class="menu-btn" id="definitionsBtn">Definitions and Terms</button>
+          <button class="menu-btn alt" id="continueBtn">Continue to the Game</button>
+        </div>
       </div>
     </div>
 
-    <div id="earth-screen" class="screen">
-      <div class="topbar">
-        <h1>Terran Explorer</h1>
-        <button class="mini-btn" id="menuBtn">Main Menu</button>
+    <div id="definitions-screen" class="screen">
+      <div class="screen-header">
+        <h2>Definitions and Terms</h2>
+        <div class="header-actions">
+          <button class="nav-btn secondary" id="howToPlayBtn">How to Play the Game</button>
+          <button class="nav-btn" id="backToStartFromDefinitions">Back</button>
+        </div>
       </div>
 
-      <div class="earth-wrap">
-        <canvas id="earthCanvas" width="620" height="620"></canvas>
-      </div>
+      <div class="definitions-content">
+        <div class="globe-panel">
+          <div class="mini-globe-box">
+            <canvas id="featureCanvas" width="540" height="540"></canvas>
+            <div class="rot-btns">
+              <button class="rot-btn" id="leftRotateBtn">◀</button>
+              <button class="rot-btn" id="rightRotateBtn">▶</button>
+            </div>
+          </div>
+        </div>
 
-      <div class="rotation-controls">
-        <button class="rotation-btn" id="leftBtn">◀ Left</button>
-        <button class="rotation-btn" id="rightBtn">Right ▶</button>
-      </div>
+        <div class="info-panel">
+          <div class="feature-list" id="featureList"></div>
 
-      <div class="hint">Drag or swipe to rotate</div>
+          <div class="feature-card" id="featureCard">
+            <div class="icon-box" id="featureIcon">🌍</div>
+            <h3 id="featureName">Earth</h3>
+            <div class="label">Definition</div>
+            <p id="featureDefinition">Earth is the third planet from the Sun and the only known planet that supports life.</p>
+            <div class="label">Explanation</div>
+            <p id="featureExplanation">It has oceans, land, atmosphere, and a dynamic crust that changes over time.</p>
+          </div>
+
+          <button class="how-to-play" id="showHowToPlayBtn">How to Play the Game</button>
+          <button class="back-btn" id="backFromDefinitions">Back</button>
+        </div>
+      </div>
     </div>
 
-    <div id="interior-screen" class="screen">
-      <div class="scene-head">
-        <button class="mini-btn" id="backBtn">← Back</button>
-        <h3 id="sceneTitle">Sea</h3>
-        <div style="width: 80px;"></div>
-      </div>
-      <div id="scene" class="scene sea-scene"></div>
-    </div>
-  </div>
+    <div id="character-screen" class="screen">
+      <div class="select-panel">
+        <h2>Choose Your Character</h2>
 
-  <div id="factModal" class="fact-modal" aria-live="polite">
-    <div class="fact-card">
-      <h4 id="factTitle">Fish</h4>
-      <div class="fact-content" id="factText">Fact text goes here.</div>
-      <button class="close-fact" id="closeFactBtn">Close</button>
+        <div class="chars" id="charList">
+          <div class="char-card selected" data-name="Cat Explorer">
+            <div class="char-illustration"></div>
+            <div class="char-name">Cat Explorer</div>
+          </div>
+          <div class="char-card" data-name="Student Explorer">
+            <div class="char-illustration"></div>
+            <div class="char-name">Student Explorer</div>
+          </div>
+          <div class="char-card" data-name="Scientist Explorer">
+            <div class="char-illustration"></div>
+            <div class="char-name">Scientist Explorer</div>
+          </div>
+          <div class="char-card" data-name="Adventure Explorer">
+            <div class="char-illustration"></div>
+            <div class="char-name">Adventure Explorer</div>
+          </div>
+        </div>
+
+        <div class="select-actions">
+          <button class="next-btn" id="nextBtn">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="howToPlayModal" class="modal" aria-live="polite">
+      <div class="modal-card">
+        <h3>How to Play</h3>
+        <ol>
+          <li>Move the character with the arrow keys or WASD.</li>
+          <li>Explore the Earth to find Sea, Volcano, Mountain, and Forest regions.</li>
+          <li>Click or tap geological and physical features to read definitions and fun facts.</li>
+          <li>Enter different environments to investigate natural processes and landforms.</li>
+          <li>Use the Back button to return to the Earth or Start Page whenever needed.</li>
+          <li>Learn about natural disasters such as earthquakes, volcanic eruptions, tsunamis, and landslides.</li>
+        </ol>
+        <button id="closeModalBtn">Close</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // ===============================================================
-    // Terran Explorer - Half Earth + Exploration Game
-    // ===============================================================
+    const screens = {
+      start: document.getElementById('start-screen'),
+      definitions: document.getElementById('definitions-screen'),
+      character: document.getElementById('character-screen')
+    };
 
-    const canvas = document.getElementById('earthCanvas');
+    const featureData = {
+      Earth: {
+        icon: '🌍',
+        definition: 'Earth is the third planet from the Sun and the only known planet that supports life.',
+        explanation: 'It has oceans, land, an atmosphere, and a changing surface shaped by natural processes.',
+        label: 'Earth'
+      },
+      Landform: {
+        icon: '🏞️',
+        definition: 'A landform is a natural feature on Earth’s surface, such as a mountain, valley, or plain.',
+        explanation: 'Landforms are shaped by tectonic forces, weathering, erosion, and deposition over long periods.',
+        label: 'Landform'
+      },
+      'Geological Feature': {
+        icon: '🪨',
+        definition: 'A geological feature is a structure formed by Earth’s natural processes over time.',
+        explanation: 'Examples include volcanoes, mountains, faults, caves, and sedimentary layers.',
+        label: 'Geological Feature'
+      },
+      'Physical Feature': {
+        icon: '🌊',
+        definition: 'A physical feature is a natural part of the environment such as a mountain, sea, river, or forest.',
+        explanation: 'Physical features help scientists understand how Earth systems interact and change.',
+        label: 'Physical Feature'
+      },
+      Volcano: {
+        icon: '🌋',
+        definition: 'A volcano is an opening in Earth’s crust through which molten rock, ash, and gases can escape.',
+        explanation: 'Volcanoes may erupt when magma rises toward the surface and pressure builds up underground.',
+        label: 'Volcano'
+      },
+      Mountain: {
+        icon: '⛰️',
+        definition: 'A mountain is a tall natural rise in the Earth’s surface formed by tectonic processes and uplift.',
+        explanation: 'Mountains are often created over millions of years as rock layers are pushed upward.',
+        label: 'Mountain'
+      },
+      'Sea/Ocean': {
+        icon: '🌊',
+        definition: 'The ocean is a large body of salt water covering most of Earth’s surface.',
+        explanation: 'Oceans help regulate climate, support marine life, and shape coastal ecosystems.',
+        label: 'Sea/Ocean'
+      },
+      Forest: {
+        icon: '🌲',
+        definition: 'A forest is a large area covered mainly with trees and rich biodiversity.',
+        explanation: 'Forests provide oxygen, habitat, and shelter for plants and animals while supporting ecosystems.',
+        label: 'Forest'
+      },
+      Earthquake: {
+        icon: '🌍',
+        definition: 'An earthquake is the shaking of Earth’s surface caused by movement of tectonic plates or faults.',
+        explanation: 'Earthquakes happen when built-up stress in Earth’s crust is suddenly released.',
+        label: 'Earthquake'
+      },
+      'Natural Hazard': {
+        icon: '⚠️',
+        definition: 'A natural hazard is a naturally occurring event that can threaten people, property, and the environment.',
+        explanation: 'Examples include earthquakes, floods, landslides, and volcanic eruptions.',
+        label: 'Natural Hazard'
+      },
+      'Natural Disaster': {
+        icon: '💥',
+        definition: 'A natural disaster is a severe natural event that causes major damage or loss of life.',
+        explanation: 'Disasters can affect communities through destruction, displacement, and environmental change.',
+        label: 'Natural Disaster'
+      }
+    };
+
+    const featureOrder = [
+      'Earth', 'Landform', 'Geological Feature', 'Physical Feature',
+      'Volcano', 'Mountain', 'Sea/Ocean', 'Forest',
+      'Earthquake', 'Natural Hazard', 'Natural Disaster'
+    ];
+
+    const canvas = document.getElementById('featureCanvas');
     const ctx = canvas.getContext('2d');
-    const sceneEl = document.getElementById('scene');
-    const sceneTitle = document.getElementById('sceneTitle');
-    const factModal = document.getElementById('factModal');
-    const factTitle = document.getElementById('factTitle');
-    const factText = document.getElementById('factText');
+    let rotation = 0;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartRotation = 0;
 
-    const earthState = {
-      rotation: 0,
-      dragging: false,
-      pointerStart: null,
-      cat: { x: 54, y: 67 }
-    };
+    const featureList = document.getElementById('featureList');
+    const featureName = document.getElementById('featureName');
+    const featureDefinition = document.getElementById('featureDefinition');
+    const featureExplanation = document.getElementById('featureExplanation');
+    const featureIcon = document.getElementById('featureIcon');
 
-    const regionData = {
-      sea: { x: 0.68, y: 0.71, label: 'Sea / Ocean' },
-      volcano: { x: 0.34, y: 0.45, label: 'Volcano' },
-      mountain: { x: 0.70, y: 0.22, label: 'Mountain' },
-      forest: { x: 0.80, y: 0.72, label: 'Forest' }
-    };
-
-    const factMap = {
-      fish: { title: 'Fish', text: 'Fish have gills that help them breathe underwater, and they live in oceans, rivers, and lakes all over Earth.' },
-      shell: { title: 'Shell', text: 'Shells protect many sea animals, like snails and clams, from predators and from drying out on land.' },
-      coral: { title: 'Coral', text: 'Corals are tiny living animals that build reefs, which provide shelter and food for many sea creatures.' },
-      seaPlant: { title: 'Sea Plant', text: 'Sea plants release oxygen and help create habitats for fish, crabs, and other organisms in the ocean.' },
-      wave: { title: 'Ocean Wave', text: 'Ocean waves carry energy across the water and help shape coastlines, beaches, and marine habitats.' },
-      rock: { title: 'Rock', text: 'Rocks are made from minerals and slowly change over time through weathering, erosion, and heat inside Earth.' },
-      magma: { title: 'Magma', text: 'Magma is melted rock beneath Earth’s surface. When it reaches the surface, it becomes lava.' },
-      volcanicRock: { title: 'Volcanic Rock', text: 'Volcanic rocks form when lava cools and hardens, and they reveal clues about Earth’s internal processes.' },
-      smoke: { title: 'Smoke', text: 'Volcanic smoke contains ash and gases that can rise high into the air during an eruption.' },
-      water: { title: 'Water Source', text: 'Mountain water often comes from rainfall and snowmelt, feeding rivers, lakes, and groundwater systems.' },
-      tree: { title: 'Tree', text: 'Trees make food using sunlight, water, and carbon dioxide and provide oxygen for Earth’s living things.' },
-      plant: { title: 'Plant', text: 'Plants are the base of many food chains because they turn sunlight into energy that other organisms use.' },
-      flower: { title: 'Flower', text: 'Flowers attract pollinators such as bees and butterflies, helping plants reproduce and spread seeds.' },
-      animal: { title: 'Animal', text: 'Animals help forests stay healthy because they spread seeds, eat plants, and keep food webs balanced.' },
-      mushroom: { title: 'Mushroom', text: 'Mushrooms are fungi that break down dead material and recycle nutrients back into the soil.' }
-    };
-
-    const sceneConfigs = {
-      sea: {
-        title: 'Sea / Ocean',
-        className: 'sea-scene',
-        html: `
-          <div class="wave w1"></div>
-          <div class="wave w2"></div>
-          <div class="wave w3"></div>
-          <div class="feature fish" data-key="fish" style="left: 12%; top: 58%;"></div>
-          <div class="feature shell" data-key="shell" style="left: 26%; top: 76%;"></div>
-          <div class="feature coral" data-key="coral" style="left: 54%; top: 70%;"></div>
-          <div class="feature seaplant" data-key="seaPlant" style="left: 74%; top: 62%;"></div>
-          <div class="feature rock" data-key="rock" style="left: 64%; top: 82%;"></div>
-          <div class="feature bubble" data-key="wave" style="left: 22%; top: 26%;"></div>
-          <div class="feature bubble" data-key="wave" style="left: 49%; top: 38%;"></div>
-          <div class="feature bubble" data-key="wave" style="left: 80%; top: 30%;"></div>
-        `
-      },
-      volcano: {
-        title: 'Volcano',
-        className: 'volcano-scene',
-        html: `
-          <div class="volcano-mountain"></div>
-          <div class="crater"><div class="lava"></div></div>
-          <div class="feature smoke" data-key="smoke" style="left: 55%; top: 18%;"></div>
-          <div class="feature magma" data-key="magma" style="left: 18%; top: 58%;"></div>
-          <div class="feature volcanic-rock" data-key="volcanicRock" style="left: 72%; top: 68%;"></div>
-          <div class="feature rock" data-key="rock" style="left: 30%; top: 76%;"></div>
-        `
-      },
-      mountain: {
-        title: 'Mountain',
-        className: 'mountain-scene',
-        html: `
-          <div class="mountain-peak"></div>
-          <div class="snow-cap"></div>
-          <div class="mountain-cloud" style="left: 12%; top: 20%;"></div>
-          <div class="mountain-cloud" style="left: 60%; top: 18%;"></div>
-          <div class="feature rock" data-key="rock" style="left: 24%; top: 72%;"></div>
-          <div class="feature water-source" data-key="water" style="left: 62%; top: 75%;"></div>
-          <div class="feature mountain-tree" data-key="tree" style="left: 34%; top: 65%;"></div>
-          <div class="feature mountain-tree" data-key="tree" style="left: 76%; top: 65%;"></div>
-        `
-      },
-      forest: {
-        title: 'Forest',
-        className: 'forest-scene',
-        html: `
-          <div class="feature forest-tree" data-key="tree" style="left: 18%; top: 58%;"></div>
-          <div class="feature forest-tree" data-key="tree" style="left: 42%; top: 53%;"></div>
-          <div class="feature forest-tree" data-key="tree" style="left: 70%; top: 62%;"></div>
-          <div class="feature forest-plant" data-key="plant" style="left: 28%; top: 76%;"></div>
-          <div class="feature flower" data-key="flower" style="left: 58%; top: 78%;"></div>
-          <div class="feature animal" data-key="animal" style="left: 68%; top: 74%;"></div>
-          <div class="feature mushroom" data-key="mushroom" style="left: 52%; top: 72%;"></div>
-          <div class="feature rock" data-key="rock" style="left: 80%; top: 80%;"></div>
-        `
-      }
-    };
-
-    // ===============================================================
-    // Earth drawing helpers
-    // ===============================================================
-
-    function buildWorldMap() {
-      const mapCanvas = document.createElement('canvas');
-      mapCanvas.width = 640;
-      mapCanvas.height = 320;
-      const m = mapCanvas.getContext('2d');
-
-      m.fillStyle = '#52c8ff';
-      m.fillRect(0, 0, mapCanvas.width, mapCanvas.height);
-
-      function blob(x, y, w, h, color) {
-        m.fillStyle = color;
-        m.beginPath();
-        m.ellipse(x, y, w, h, 0, 0, 2 * Math.PI);
-        m.fill();
-      }
-
-      // Large green continents
-      blob(105, 145, 135, 85, '#97d65e');
-      blob(245, 120, 150, 90, '#84cf6a');
-      blob(430, 165, 115, 70, '#9bdd67');
-      blob(520, 130, 95, 70, '#8aca60');
-
-      // Mountain / brown patches
-      blob(200, 105, 24, 18, '#b78a63');
-      blob(325, 95, 28, 20, '#8b7456');
-      blob(488, 160, 22, 18, '#a98464');
-
-      // Coastline highlights
-      m.fillStyle = 'rgba(255,255,255,0.18)';
-      for (let i = 0; i < 18; i++) {
-        m.fillRect(18 + i * 28, 50 + (i % 5) * 18, 12, 10);
-      }
-
-      return mapCanvas;
+    function showScreen(name) {
+      Object.entries(screens).forEach(([key, screen]) => {
+        screen.classList.toggle('active', key === name);
+      });
+      document.getElementById('howToPlayModal').classList.remove('show');
     }
 
-    const worldMap = buildWorldMap();
+    function renderFeatureList() {
+      featureList.innerHTML = '';
 
-    function drawPixelEarth() {
+      featureOrder.forEach((name) => {
+        const btn = document.createElement('button');
+        btn.className = 'feature-chip';
+        btn.type = 'button';
+        btn.textContent = name;
+        btn.addEventListener('click', () => showFeature(name));
+        featureList.appendChild(btn);
+      });
+    }
+
+    function showFeature(name) {
+      const data = featureData[name];
+      if (!data) return;
+
+      featureName.textContent = data.label;
+      featureDefinition.textContent = data.definition;
+      featureExplanation.textContent = data.explanation;
+      featureIcon.textContent = data.icon;
+    }
+
+    function drawMiniGlobe() {
       const w = canvas.width;
       const h = canvas.height;
       const cx = w / 2;
-      const cy = h / 2 + 16;
+      const cy = h / 2 + 14;
       const r = Math.min(w, h) * 0.42;
 
       ctx.clearRect(0, 0, w, h);
 
-      // Sky aura behind earth
-      ctx.fillStyle = 'rgba(255,255,255,0.12)';
-      ctx.beginPath();
-      ctx.arc(cx, cy - 4, r + 12, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Clip to a top half-sphere (half-earth reference shape)
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(cx - r, cy);
@@ -955,262 +861,141 @@
       ctx.closePath();
       ctx.clip();
 
-      // Draw ocean base and map texture
-      const textureOffset = (earthState.rotation % 1) * worldMap.width;
-      ctx.fillStyle = '#58c8ff';
+      const water = ctx.createLinearGradient(0, cy - r, 0, cy + r);
+      water.addColorStop(0, '#6fd7ff');
+      water.addColorStop(0.5, '#58caff');
+      water.addColorStop(1, '#1c7fc7');
+      ctx.fillStyle = water;
       ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
 
-      for (let dx = -worldMap.width; dx < worldMap.width * 2; dx += worldMap.width) {
-        ctx.drawImage(
-          worldMap,
-          (textureOffset + dx) % (worldMap.width * 2),
-          0,
-          worldMap.width,
-          worldMap.height,
-          cx - r,
-          cy - r,
-          r * 2,
-          r * 2
-        );
+      const landShapes = [
+        { x: 96, y: 138, w: 112, h: 74, color: '#9fe268' },
+        { x: 184, y: 100, w: 120, h: 66, color: '#88ce60' },
+        { x: 318, y: 148, w: 120, h: 70, color: '#9fe268' },
+        { x: 388, y: 118, w: 86, h: 56, color: '#8ad069' },
+        { x: 242, y: 196, w: 110, h: 64, color: '#8dd861' }
+      ];
+
+      const drift = (rotation * 120) % 200;
+
+      landShapes.forEach((shape) => {
+        const x = cx - r + ((shape.x + drift) % (w + 40)) - 10;
+        const y = cy - r + shape.y * 0.8;
+        ctx.fillStyle = shape.color;
+        ctx.beginPath();
+        ctx.ellipse(x, y, shape.w, shape.h, 0, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      for (let i = 0; i < 16; i++) {
+        ctx.fillRect(cx - r + 16 + i * 18, cy - r + 18 + (i % 4) * 12, 10, 8);
       }
 
-      // Shade the bottom as if in shadow
-      const shadow = ctx.createRadialGradient(cx - 60, cy + 18, 10, cx - 10, cy + 40, r + 60);
+      const shadow = ctx.createRadialGradient(cx - 40, cy + 30, 12, cx - 10, cy + 38, r + 40);
       shadow.addColorStop(0, 'rgba(0,0,0,0)');
-      shadow.addColorStop(0.7, 'rgba(0,0,0,0.10)');
-      shadow.addColorStop(1, 'rgba(0,0,0,0.25)');
+      shadow.addColorStop(0.7, 'rgba(0,0,0,0.08)');
+      shadow.addColorStop(1, 'rgba(0,0,0,0.22)');
       ctx.fillStyle = shadow;
       ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
 
-      // Highlight top-left glow
-      const shine = ctx.createRadialGradient(cx - 90, cy - 90, 10, cx - 70, cy - 70, r * 0.9);
-      shine.addColorStop(0, 'rgba(255,255,255,0.5)');
-      shine.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = shine;
-      ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
       ctx.restore();
 
-      // Earth rim
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.lineWidth = 9;
-      ctx.strokeStyle = '#132d45';
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = '#1b2f4d';
       ctx.stroke();
 
-      // Inner cutaway edge to suggest half-planet
       ctx.beginPath();
       ctx.moveTo(cx - r, cy);
       ctx.arc(cx, cy, r, Math.PI, 0, false);
       ctx.lineWidth = 6;
-      ctx.strokeStyle = '#1a3d5f';
+      ctx.strokeStyle = '#173c61';
       ctx.stroke();
-
-      // Draw cat as a simple pixel sprite on surface
-      drawCatOnEarth(cx, cy, r);
-
-      // Draw region markers on the surface in a simplified 2D placement
-      drawRegionMarker('sea', 'Sea', cx + r * 0.58, cy + r * 0.42, 68, 34);
-      drawRegionMarker('volcano', 'Volcano', cx - r * 0.62, cy - r * 0.02, 70, 34);
-      drawRegionMarker('mountain', 'Mountain', cx + r * 0.28, cy - r * 0.48, 80, 34);
-      drawRegionMarker('forest', 'Forest', cx + r * 0.52, cy + r * 0.12, 66, 34);
     }
 
-    function drawRegionMarker(key, label, x, y, w, h) {
-      const hitRadius = 26;
-      regionData[key].hit = { x, y, r: hitRadius };
-
-      ctx.fillStyle = 'rgba(255,255,255,0.75)';
-      ctx.strokeStyle = '#18385f';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.roundRect(x - w / 2, y - h / 2, w, h, 8);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#f7cc52';
-      ctx.beginPath();
-      ctx.arc(x - w / 2 - 8, y, 7, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#182c43';
-      ctx.font = 'bold 14px Trebuchet MS';
-      ctx.textAlign = 'center';
-      ctx.fillText(label, x, y + 5);
-    }
-
-    function drawCatOnEarth(cx, cy, r) {
-      const x = cx + r * 0.12 + (earthState.cat.x - 50) * (r * 0.55 / 50);
-      const y = cy + r * 0.18 + (earthState.cat.y - 50) * (r * 0.45 / 50);
-
-      const size = 20;
-      ctx.save();
-      ctx.translate(x, y);
-
-      // body
-      ctx.fillStyle = '#f4c589';
-      ctx.fillRect(-10, -4, 20, 15);
-      ctx.fillStyle = '#e1a55e';
-      ctx.fillRect(-7, -8, 14, 6);
-
-      // ears
-      ctx.fillStyle = '#f4c589';
-      ctx.fillRect(-7, -12, 4, 6);
-      ctx.fillRect(3, -12, 4, 6);
-
-      // eyes
-      ctx.fillStyle = '#0f1e2f';
-      ctx.fillRect(-4, -1, 3, 3);
-      ctx.fillRect(3, -1, 3, 3);
-
-      // nose
-      ctx.fillStyle = '#de8d5d';
-      ctx.fillRect(-1, 2, 2, 2);
-
-      // paws
-      ctx.fillStyle = '#f4c589';
-      ctx.fillRect(-8, 10, 4, 4);
-      ctx.fillRect(4, 10, 4, 4);
-
-      ctx.restore();
-    }
-
-    // ===============================================================
-    // Interaction / rotation / selection
-    // ===============================================================
-
-    function screenToCanvasPos(event) {
-      const rect = canvas.getBoundingClientRect();
-      return {
-        x: (event.clientX - rect.left) * (canvas.width / rect.width),
-        y: (event.clientY - rect.top) * (canvas.height / rect.height)
-      };
-    }
-
-    function getClickedRegion(x, y) {
-      for (const [key, data] of Object.entries(regionData)) {
-        if (data.hit && Math.hypot(x - data.hit.x, y - data.hit.y) < data.hit.r) {
-          return key;
-        }
-      }
-      return null;
+    function updateGlobeRotation() {
+      canvas.style.transform = `rotateY(${rotation}deg)`;
+      drawMiniGlobe();
     }
 
     canvas.addEventListener('pointerdown', (event) => {
-      const pos = screenToCanvasPos(event);
-      const region = getClickedRegion(pos.x, pos.y);
-      if (region) {
-        openRegion(region);
-        return;
-      }
-
-      earthState.dragging = true;
-      earthState.pointerStart = { x: event.clientX, y: event.clientY, rotation: earthState.rotation };
+      isDragging = true;
       canvas.classList.add('dragging');
+      dragStartX = event.clientX;
+      dragStartRotation = rotation;
     });
 
     window.addEventListener('pointermove', (event) => {
-      if (!earthState.dragging || !earthState.pointerStart) return;
-      const dx = event.clientX - earthState.pointerStart.x;
-      earthState.rotation = earthState.pointerStart.rotation + dx / 280;
-      drawPixelEarth();
+      if (!isDragging) return;
+      const dx = event.clientX - dragStartX;
+      rotation = dragStartRotation + dx * 0.6;
+      updateGlobeRotation();
     });
 
     window.addEventListener('pointerup', () => {
-      earthState.dragging = false;
-      earthState.pointerStart = null;
+      isDragging = false;
       canvas.classList.remove('dragging');
     });
 
-    canvas.addEventListener('pointerleave', () => {
-      earthState.dragging = false;
-      earthState.pointerStart = null;
-      canvas.classList.remove('dragging');
+    document.getElementById('leftRotateBtn').addEventListener('click', () => {
+      rotation -= 0.18;
+      updateGlobeRotation();
     });
 
-    function rotateEarth(dir) {
-      earthState.rotation += dir * 0.18;
-      drawPixelEarth();
-    }
+    document.getElementById('rightRotateBtn').addEventListener('click', () => {
+      rotation += 0.18;
+      updateGlobeRotation();
+    });
 
-    document.getElementById('leftBtn').addEventListener('click', () => rotateEarth(-1));
-    document.getElementById('rightBtn').addEventListener('click', () => rotateEarth(1));
+    document.getElementById('definitionsBtn').addEventListener('click', () => {
+      showScreen('definitions');
+      showFeature('Earth');
+      updateGlobeRotation();
+    });
 
-    // ===============================================================
-    // Environment exploration
-    // ===============================================================
+    document.getElementById('continueBtn').addEventListener('click', () => {
+      showScreen('character');
+    });
 
-    function openRegion(region) {
-      const config = sceneConfigs[region];
-      if (!config) return;
+    document.getElementById('backToStartFromDefinitions').addEventListener('click', () => {
+      showScreen('start');
+    });
 
-      sceneTitle.textContent = config.title;
-      sceneEl.className = 'scene ' + config.className;
-      sceneEl.innerHTML = config.html;
+    document.getElementById('backFromDefinitions').addEventListener('click', () => {
+      showScreen('start');
+    });
 
-      sceneEl.querySelectorAll('.feature').forEach((element) => {
-        element.addEventListener('click', () => {
-          const key = element.dataset.key;
-          const info = factMap[key];
-          if (info) {
-            factTitle.textContent = info.title;
-            factText.textContent = info.text;
-            factModal.classList.add('show');
-          }
-        });
+    document.getElementById('showHowToPlayBtn').addEventListener('click', () => {
+      document.getElementById('howToPlayModal').classList.add('show');
+    });
+
+    document.getElementById('howToPlayBtn').addEventListener('click', () => {
+      document.getElementById('howToPlayModal').classList.add('show');
+    });
+
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+      document.getElementById('howToPlayModal').classList.remove('show');
+    });
+
+    document.querySelectorAll('.char-card').forEach((card) => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.char-card').forEach((c) => c.classList.remove('selected'));
+        card.classList.add('selected');
       });
-
-      document.getElementById('earth-screen').classList.remove('active');
-      document.getElementById('interior-screen').classList.add('active');
-    }
-
-    document.getElementById('backBtn').addEventListener('click', () => {
-      document.getElementById('interior-screen').classList.remove('active');
-      document.getElementById('earth-screen').classList.add('active');
-      factModal.classList.remove('show');
     });
 
-    document.getElementById('menuBtn').addEventListener('click', () => {
-      document.getElementById('earth-screen').classList.remove('active');
-      document.getElementById('menu-screen').classList.add('active');
-      factModal.classList.remove('show');
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      const selected = document.querySelector('.char-card.selected');
+      if (!selected) return;
+      alert('Selected character: ' + selected.dataset.name + '\nThis is the main game start point.');
     });
 
-    document.getElementById('startBtn').addEventListener('click', () => {
-      document.getElementById('menu-screen').classList.remove('active');
-      document.getElementById('earth-screen').classList.add('active');
-    });
-
-    document.getElementById('closeFactBtn').addEventListener('click', () => {
-      factModal.classList.remove('show');
-    });
-
-    document.addEventListener('keydown', (event) => {
-      const key = event.key.toLowerCase();
-      if (key === 'arrowleft' || key === 'a') rotateEarth(-1);
-      if (key === 'arrowright' || key === 'd') rotateEarth(1);
-      if (key === 'arrowup' || key === 'w') {
-        earthState.cat.y = Math.max(15, earthState.cat.y - 4);
-        drawPixelEarth();
-      }
-      if (key === 'arrowdown' || key === 's') {
-        earthState.cat.y = Math.min(84, earthState.cat.y + 4);
-        drawPixelEarth();
-      }
-      if (key === 'enter') {
-        const candidate = Object.keys(regionData).find((keyName) => {
-          const p = regionData[keyName];
-          return Math.abs(earthState.cat.x - (p.x * 100)) < 10 && Math.abs(earthState.cat.y - (p.y * 100)) < 12;
-        });
-        if (candidate) openRegion(candidate);
-      }
-    });
-
-    // ===============================================================
-    // Startup
-    // ===============================================================
-
-    document.getElementById('earth-screen').classList.add('active');
-    drawPixelEarth();
+    document.getElementById('start-screen').classList.add('active');
+    renderFeatureList();
+    showFeature('Earth');
+    drawMiniGlobe();
   </script>
 </body>
 </html>
